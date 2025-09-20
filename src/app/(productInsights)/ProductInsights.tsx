@@ -11,7 +11,7 @@ import { H1, TextSM, TextXS } from "../_components/Typography";
 import { Button } from "@/components/ui/button";
 import { Share } from "lucide-react";
 import useAppStore from "@/store/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -45,18 +45,44 @@ const ProductInsights = () => {
 
   const [store, setStore] = useState<store>("indian");
 
+  const [formatted, setFormatted] = useState("");
+  const [iso, setIso] = useState("");
+
+  useEffect(() => {
+    const now = new Date();
+    setIso(now.toISOString());
+    setFormatted(
+      now.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      })
+    );
+  }, []);
+
   return (
     <main className="container mx-auto pb-10 relative">
       {/* HEADER */}
-      <header className="flex justify-between items-center pt-3 pb-4 sticky top-0 z-50 bg-[#F9FAFB]">
+      <header
+        className="
+        flex justify-between items-center 
+        pt-3 pb-4 
+        sticky top-0 z-50 
+        bg-[#F9FAFB]
+        before:content-[''] before:absolute before:top-0 before:-left-10 before:w-10 before:h-full before:bg-[#F9FAFB] before:z-40
+        after:content-[''] after:absolute after:top-0 after:-right-10 after:w-10 after:h-full after:bg-[#F9FAFB] after:z-40
+      "
+      >
         <H1 text="Product Insights" />
 
         <div className="flex items-center gap-4">
           <TextXS className="text-green-600 flex items-center gap-1">
             <span className="inline-grid h-2 w-2 rounded-full bg-green-600" />
-            <time dateTime="2024-10-22T12:23:00+05:30">
-              Updated on 22 Oct 2024, 12:23 IST
-            </time>
+            <time dateTime={iso}>Updated on {formatted}</time>
           </TextXS>
 
           <Select

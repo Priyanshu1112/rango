@@ -2,18 +2,6 @@ import { NextRequest } from "next/server";
 import { catchApiError } from "@/utils/api/catchApiError";
 import { successResponse } from "@/utils/api/Response";
 
-type KPI = {
-    label: string;
-    value: string;
-    trend: "up" | "down";
-    upBy?: string;
-    description: string;
-    data: {
-        labels: string[];
-        datasets: { data: number[] }[];
-    };
-};
-
 // ---------- helpers ----------
 function randInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;

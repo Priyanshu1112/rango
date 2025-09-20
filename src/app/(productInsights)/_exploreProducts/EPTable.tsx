@@ -7,7 +7,6 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import {
   ColumnDef,
   flexRender,
@@ -24,69 +23,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import useExploreProductsStore from "@/store/exploreProducts";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-type Row = {
-  id: string;
-  product: string;
-  feedback: string;
-  stores: number;
-  sentiment: "Positive" | "Neutral" | "Negative";
-  issue?: string;
-};
+export default function ProductIssuesTable({ store }: { store: store }) {
+  const { tableData, loading, fetchTableData } = useExploreProductsStore();
 
-const columns = [
-  "Product",
-  "Feedback",
-  "Available in #Stores",
-  "Sentiment",
-  "Issue, if Any",
-];
+  useEffect(() => {
+    fetchTableData(store);
+  }, [store]);
 
-const DATA: Row[] = [
-  {
-    id: "p1",
-    product: "18K Gold Diamond Ring",
-    feedback: "Love the cost to value of this",
-    stores: 231,
-    sentiment: "Positive",
-    issue: "Inventory Issue",
-  },
-  {
-    id: "p2",
-    product: "Platinum Sapphire Necklace",
-    feedback: "Love the cost to value of this",
-    stores: 334,
-    sentiment: "Neutral",
-    issue: "Seasonal",
-  },
-  {
-    id: "p3",
-    product: "Silver Emerald Earrings",
-    feedback: "Love the cost to value of this",
-    stores: 231,
-    sentiment: "Negative",
-    issue: "Inventory shortage",
-  },
-  {
-    id: "p4",
-    product: "Rose Gold Aquamarine Bracelet",
-    feedback: "Love the cost to value of this",
-    stores: 53,
-    sentiment: "Positive",
-    issue: "Discontinued SKU",
-  },
-  {
-    id: "p5",
-    product: "White Gold Pearl Pendant",
-    feedback: "Love the cost to value of this",
-    stores: 109,
-    sentiment: "Positive",
-    issue: "Discontinued SKU",
-  },
-];
-
-export default function ProductIssuesTable() {
-  const columnsTable: ColumnDef<Row>[] = [
+  const columnsTable: ColumnDef<ExploreProductsTableData>[] = [
     {
       accessorKey: "product",
       header: "Product",
@@ -177,7 +125,7 @@ export default function ProductIssuesTable() {
   ];
 
   const table = useReactTable({
-    data: DATA,
+    data: tableData,
     columns: columnsTable,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -216,7 +164,17 @@ export default function ProductIssuesTable() {
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {loading ? (
+              <>
+                {[...Array(4)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="py-5 align-middle" colSpan={7}>
+                      <Skeleton className="h-[40px] w-full" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -235,7 +193,7 @@ export default function ProductIssuesTable() {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={columnsTable.length}
                   className="h-24 text-center"
                 >
                   No results.

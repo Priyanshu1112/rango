@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SalesBreakDownChart from "./SalesBreakDownChart";
 import { TextLG, TextXS } from "@/app/_components/Typography";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,7 @@ import CalendarButton from "@/app/_components/CalendarButton";
 import { Card } from "@/components/ui/card";
 import SalesBreakdownTable from "./SalesBreakdownTable";
 import { Sparkle } from "lucide-react";
+import useSalesBreakdownStore from "@/store/salesBreakdown";
 
 const salesTabs: salesBreakDownTabs[] = [
   "Rings",
@@ -18,7 +19,13 @@ const salesTabs: salesBreakDownTabs[] = [
 ];
 
 const SalesBreakDown = ({ store }: { store: store }) => {
+  const { chartData, dominate, loading, fetchSalesBreakdown } =
+    useSalesBreakdownStore();
   const [tabs, setTabs] = useState<salesBreakDownTabs>("Rings");
+
+  useEffect(() => {
+    fetchSalesBreakdown(store);
+  }, [store, tabs]);
 
   return (
     <div>
@@ -26,10 +33,7 @@ const SalesBreakDown = ({ store }: { store: store }) => {
       <div className="flex justify-between items-center mb-2">
         <div>
           <TextXS text="Sales break down" className="text-muted-foreground" />
-          <TextLG
-            text="Earrings dominate June at ₹102.6Cr; gold surge July"
-            className="mt-1"
-          />
+          <TextLG text={loading ? "Loading..." : dominate} className="mt-1" />
         </div>
         <div className="flex gap-2 items-center">
           <Tabs
@@ -53,8 +57,8 @@ const SalesBreakDown = ({ store }: { store: store }) => {
       </div>
 
       <Card className="rounded-[10px] px-3 gap-5">
-        <SalesBreakDownChart />
-        <SalesBreakdownTable />
+        <SalesBreakDownChart data={loading ? [] : chartData} />
+        <SalesBreakdownTable store={store} />
         <p className="text-[13px] rounded-md shadow-xs tracking-normal flex gap-2 py-2 px-3 bg-blue-100 text-blue-700">
           <Sparkle size={16} />
           Checkout abandonment is disproportionately high for 18kt gold,

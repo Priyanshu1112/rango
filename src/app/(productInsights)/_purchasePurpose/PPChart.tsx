@@ -1,6 +1,6 @@
 // components/StackedRevenueChart.tsx
-import React, { useMemo } from "react";
-import { ChartData, ChartOptions, Plugin } from "chart.js";
+import React, { useMemo, useRef } from "react";
+import { ChartData, ChartOptions, Plugin, Chart as ChartJS } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Card } from "@/components/ui/card";
@@ -49,108 +49,6 @@ const totalsPlugin: Plugin<"bar"> = {
   },
 };
 
-// Chart options — updated legend, grid (dashed both axes) and y-axis title
-const options: ChartOptions<"bar"> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  interaction: {
-    mode: "index",
-    intersect: false,
-  },
-  plugins: {
-    legend: {
-      display: true,
-      position: "top",
-      align: "start",
-      labels: {
-        // Styling the legend labels (text + swatch)
-        color: "#737373 ", // legend text color (gray-500)
-        font: {
-          size: 12,
-          weight: "bold",
-        },
-        boxWidth: 8, // swatch width
-        boxHeight: 8, // swatch height
-        padding: 8, // space between legend items
-        usePointStyle: false, // keep square swatches (set true if you prefer circular/point style)
-        // If you need fully custom swatches you can use generateLabels callback here
-      },
-    },
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: (ctx) => {
-          const label = ctx.dataset.label ?? "";
-          const value = ctx.parsed.y ?? ctx.parsed;
-          return `${label}: ${value}`;
-        },
-      },
-    },
-    datalabels: {
-      color: "#000000B2",
-      anchor: "center",
-      align: "center",
-      font: {
-        weight: "normal",
-        size: 10,
-      },
-      formatter: (value: number) => {
-        return value > 0 ? String(value) : "";
-      },
-    },
-  },
-  scales: {
-    x: {
-      stacked: true,
-      ticks: {
-        color: "#737373",
-        padding: 8,
-        font: {
-          size: 12,
-          weight: "bold",
-        },
-      },
-      grid: {
-        // vertical grid lines (dashed)
-        display: true,
-        drawOnChartArea: true,
-        color: "#E5E7EB",
-      },
-    },
-    y: {
-      stacked: true,
-      position: "right",
-      suggestedMax: 9000,
-      ticks: {
-        stepSize: 1500,
-        color: "#737373",
-        callback: (value) => String(value),
-        padding: 4,
-      },
-      grid: {
-        // horizontal grid lines (dashed)
-        display: true,
-        drawOnChartArea: true,
-        color: "#E5E7EB",
-      },
-    },
-  },
-  layout: {
-    padding: {
-      top: 12,
-      bottom: 0,
-      left: 6,
-      right: 12,
-    },
-  },
-  elements: {
-    bar: {
-      borderRadius: 4,
-      borderSkipped: false,
-    },
-  },
-};
-
 export default function StackedRevenueChart({
   data,
   loading,
@@ -158,6 +56,8 @@ export default function StackedRevenueChart({
   data: purchaseProductChartData;
   loading: boolean;
 }) {
+  const chartRef = useRef<ChartJS<"bar">>(null);
+
   const plugins = useMemo(() => [totalsPlugin], []);
 
   const chartData: ChartData<"bar", number[], string> = loading
@@ -193,9 +93,118 @@ export default function StackedRevenueChart({
         ],
       };
 
+  // Chart options — updated legend, grid (dashed both axes) and y-axis title
+  const options: ChartOptions<"bar"> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        align: "start",
+        labels: {
+          // Styling the legend labels (text + swatch)
+          color: "#737373 ", // legend text color (gray-500)
+          font: {
+            size: 12,
+            weight: "bold",
+          },
+          boxWidth: 8, // swatch width
+          boxHeight: 8, // swatch height
+          padding: 8, // space between legend items
+          usePointStyle: false, // keep square swatches (set true if you prefer circular/point style)
+          // If you need fully custom swatches you can use generateLabels callback here
+        },
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          label: (ctx) => {
+            const label = ctx.dataset.label ?? "";
+            const value = ctx.parsed.y ?? ctx.parsed;
+            return `${label}: ${value}`;
+          },
+        },
+      },
+      datalabels: {
+        color: "#000000B2",
+        anchor: "center",
+        align: "center",
+        font: {
+          weight: "normal",
+          size: 10,
+        },
+        formatter: (value: number) => {
+          return value > 0 ? String(value) : "";
+        },
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: {
+          color: "#737373",
+          padding: 8,
+          font: {
+            size: 12,
+            weight: "bold",
+          },
+        },
+        grid: {
+          // vertical grid lines (dashed)
+          display: true,
+          drawOnChartArea: true,
+          color: "#E5E7EB",
+        },
+      },
+      y: {
+        stacked: true,
+        position: "right",
+        suggestedMax: 9000,
+        ticks: {
+          stepSize: 1500,
+          color: "#737373",
+          callback: (value) => String(value),
+          padding: 4,
+        },
+        grid: {
+          // horizontal grid lines (dashed)
+          display: true,
+          drawOnChartArea: true,
+          color: "#E5E7EB",
+        },
+      },
+    },
+    layout: {
+      padding: {
+        top: 12,
+        bottom: 0,
+        left: 6,
+        right: 12,
+      },
+    },
+    elements: {
+      bar: {
+        borderRadius: 4,
+        borderSkipped: false,
+      },
+    },
+
+    onHover: () => {
+      // change cursor
+      const canvas = chartRef.current?.canvas;
+      if (canvas) canvas.style.cursor = "pointer";
+    },
+  };
+
   return (
     <Card className="p-4 max-h-[344px] rounded-[10px]">
       <Bar
+        ref={chartRef}
         data={chartData}
         options={options}
         plugins={[...plugins, ...cdlPlugins]}

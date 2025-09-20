@@ -1,137 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { TextSM, TextXS } from "@/app/_components/Typography";
 import { TrendingUp } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type Row = {
-  size: string;
-  cols: {
-    value: string;
-    percent: string;
-    reasons: string;
-    extra?: string;
-  }[];
-  revenue: { amount: string; changePct: string };
-};
+import useSalesBreakdownStore from "@/store/salesBreakdown";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const salesTabs: salesBreakDownTableTabs[] = [
   "Lab-grown Diamond / Clarity",
   "Gold",
 ];
 
-const DATA: Row[] = [
-  {
-    size: "< 1 ct",
-    cols: [
-      {
-        value: "50K",
-        percent: "2%",
-        reasons: "Market fluctuations, supply issues, +2",
-      },
-      {
-        value: "50K",
-        percent: "2%",
-        reasons: "Market fluctuations, supply issues, +2",
-      },
-      {
-        value: "50K",
-        percent: "2%",
-        reasons: "Market fluctuations, supply issues, +2",
-      },
-      {
-        value: "50K",
-        percent: "2%",
-        reasons: "Market fluctuations, supply issues, +2",
-      },
-    ],
-    revenue: { amount: "₹10,40,00,000", changePct: "12%" },
-  },
-  {
-    size: "1.0 - 1.5 ct",
-    cols: [
-      {
-        value: "100K",
-        percent: "4%",
-        reasons: "Regulatory changes, staffing, +4",
-      },
-      {
-        value: "100K",
-        percent: "4%",
-        reasons: "Regulatory changes, staffing, +4",
-      },
-      {
-        value: "100K",
-        percent: "4%",
-        reasons: "Regulatory changes, staffing, +4",
-      },
-      {
-        value: "100K",
-        percent: "4%",
-        reasons: "Regulatory changes, staffing, +4",
-      },
-    ],
-    revenue: { amount: "₹11,20,00,000", changePct: "12%" },
-  },
-  {
-    size: "1.5 - 2.0 ct",
-    cols: [
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-    ],
-    revenue: { amount: "₹11,20,00,000", changePct: "12%" },
-  },
-  {
-    size: "> 2.0 ct",
-    cols: [
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-      {
-        value: "30K",
-        percent: "1%",
-        reasons: "Technical hiccups, training, +1",
-      },
-    ],
-    revenue: { amount: "₹9,60,00,000", changePct: "12%" },
-  },
-];
+export default function SalesBreakdownTable({ store }: { store: store }) {
+  const { tableData, loadingTable, fetchSalesBreakdownTable } =
+    useSalesBreakdownStore();
 
-export default function SalesBreakdownTable() {
   const [tabs, setTabs] = useState<salesBreakDownTableTabs>(
     "Lab-grown Diamond / Clarity"
   );
+
+  useEffect(() => {
+    fetchSalesBreakdownTable(store, tabs);
+  }, [store, tabs]);
   return (
     <div className="">
       <div className="mb-1 max-w-[286px]">
@@ -163,55 +54,67 @@ export default function SalesBreakdownTable() {
 
       <Table className="w-full">
         <TableBody>
-          {DATA.map((row) => (
-            <TableRow key={row.size} className="align-top">
-              {/* size cell */}
-              <TableCell className="py-5 align-middle">
-                <TextSM text={row.size} className="text-[#0A0A0A]" />
-              </TableCell>
+          {loadingTable ? (
+            <>
+              {[...Array(4)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="py-5 align-middle" colSpan={7}>
+                    <Skeleton className="h-[40px] w-full" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </>
+          ) : (
+            tableData.map((row) => (
+              <TableRow key={row.size} className="align-top">
+                {/* size cell */}
+                <TableCell className="py-5 align-middle">
+                  <TextSM text={row.size} className="text-[#0A0A0A]" />
+                </TableCell>
 
-              {/* metric columns */}
-              {row.cols.map((c, ci) => (
-                <TableCell key={ci} className="py-[10px] px-2 align-middle">
-                  <div className="flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-2">
-                      <TextSM
-                        text={c.value}
-                        className="text-[#0A0A0A] font-normal"
+                {/* metric columns */}
+                {row.cols.map((c, ci) => (
+                  <TableCell key={ci} className="py-[10px] px-2 align-middle">
+                    <div className="flex flex-col items-start gap-1">
+                      <div className="flex items-center gap-2">
+                        <TextSM
+                          text={c.value}
+                          className="text-[#0A0A0A] font-normal"
+                        />
+                        <Badge className="bg-[#FEE2E2] text-[#EF4444] border-none px-2 py-0.5 rounded-md text-xs font-semibold leading-4 tracking-normal">
+                          {c.percent}
+                        </Badge>
+                      </div>
+                      <TextXS
+                        text={c.reasons}
+                        className="text-[#0A0A0A] font-normal opacity-50"
                       />
-                      <Badge className="bg-[#FEE2E2] text-[#EF4444] border-none px-2 py-0.5 rounded-md text-xs font-semibold leading-4 tracking-normal">
-                        {c.percent}
-                      </Badge>
                     </div>
-                    <TextXS
-                      text={c.reasons}
-                      className="text-[#0A0A0A] font-normal opacity-50"
-                    />
+                  </TableCell>
+                ))}
+
+                {/* revenue cell */}
+                <TableCell className="py-6 align-top text-right">
+                  <div className="flex flex-col items-start gap-1">
+                    <div className="text-sm font-medium">
+                      {row.revenue.amount}
+                    </div>
+                    <div className="text-xs flex items-center gap-1">
+                      <TrendingUp size={14} color="#2D912A" />
+                      <span>
+                        <span className="text-xs text-[#2D912A]">
+                          {row.revenue.changePct}{" "}
+                        </span>
+                        <span className="text-[#0A0A0A] opacity-50">
+                          from last month
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 </TableCell>
-              ))}
-
-              {/* revenue cell */}
-              <TableCell className="py-6 align-top text-right">
-                <div className="flex flex-col items-start gap-1">
-                  <div className="text-sm font-medium">
-                    {row.revenue.amount}
-                  </div>
-                  <div className="text-xs flex items-center gap-1">
-                    <TrendingUp size={14} color="#2D912A" />
-                    <span>
-                      <span className="text-xs text-[#2D912A]">
-                        {row.revenue.changePct}{" "}
-                      </span>
-                      <span className="text-[#0A0A0A] opacity-50">
-                        from last month
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

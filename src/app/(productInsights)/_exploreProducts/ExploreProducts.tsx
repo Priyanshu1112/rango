@@ -58,7 +58,7 @@ const ExploreProducts = ({ store }: { store: store }) => {
         </div>
       </div>
 
-      <EPTable />
+      <EPTable store={store} />
     </div>
   );
 };
