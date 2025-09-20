@@ -26,6 +26,7 @@ import {
 import KPI from "./_kpi/KPI";
 import PurchasePurpose from "./_purchasePurpose/PurchasePurpose";
 import SalesBreakDown from "./_salesBreakDown/SalesBreakDown";
+import ExploreProducts from "./_exploreProducts/ExploreProducts";
 
 ChartJS.register(
   CategoryScale,
@@ -96,7 +97,11 @@ const ProductInsights = () => {
         {/* Purchase Purpose */}
         <PurchasePurpose store={store} />
 
+        {/* Sales Break Down */}
         <SalesBreakDown store={store} />
+
+        {/* Explore Products */}
+        <ExploreProducts store={store} />
       </section>
     </main>
   );

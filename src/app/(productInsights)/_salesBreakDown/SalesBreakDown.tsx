@@ -25,10 +25,7 @@ const SalesBreakDown = ({ store }: { store: store }) => {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-2">
         <div>
-          <TextXS
-            text="Purchase Purpose Trends"
-            className="text-muted-foreground"
-          />
+          <TextXS text="Sales break down" className="text-muted-foreground" />
           <TextLG
             text="Earrings dominate June at ₹102.6Cr; gold surge July"
             className="mt-1"
