@@ -5,9 +5,11 @@ import React from "react";
 import useAppStore from "@/store/app";
 import CalendarButton from "@/app/_components/CalendarButton";
 import EPTable from "./EPTable";
+import { useState } from "react";
 
 const ExploreProducts = ({ store }: { store: store }) => {
   const { setSuccess } = useAppStore();
+  const [search, setSearch] = useState("");
 
   return (
     <div>
@@ -31,6 +33,8 @@ const ExploreProducts = ({ store }: { store: store }) => {
               type="text"
               placeholder="Search Products & Services"
               className="outline-none text-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
@@ -58,7 +62,7 @@ const ExploreProducts = ({ store }: { store: store }) => {
         </div>
       </div>
 
-      <EPTable store={store} />
+      <EPTable store={store} search={search} />
     </div>
   );
 };

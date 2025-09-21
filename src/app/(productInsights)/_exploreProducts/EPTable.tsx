@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableHeader,
@@ -8,14 +8,20 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import {
+  getSortedRowModel,
+  SortingState,
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
+  ColumnFiltersState,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import { TextSM, TextXS } from "@/app/_components/Typography";
 import Image from "next/image";
 import {
+  ArrowUpDown,
   ArrowUpRight,
   ChevronsDown,
   ChevronsUp,
@@ -26,9 +32,20 @@ import { Button } from "@/components/ui/button";
 import useExploreProductsStore from "@/store/exploreProducts";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Pagination from "@/app/_components/Pagination";
 
-export default function ProductIssuesTable({ store }: { store: store }) {
+export default function ProductIssuesTable({
+  store,
+  search,
+}: {
+  store: store;
+  search: string;
+}) {
   const { tableData, loading, fetchTableData } = useExploreProductsStore();
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   useEffect(() => {
     fetchTableData(store);
@@ -37,7 +54,22 @@ export default function ProductIssuesTable({ store }: { store: store }) {
   const columnsTable: ColumnDef<ExploreProductsTableData>[] = [
     {
       accessorKey: "product",
-      header: "Product",
+      header: ({ column }) => {
+        return (
+          <div className="text-start">
+            <Button
+              variant="ghost"
+              className="text-xs font-normal"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Product
+              <ArrowUpDown className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
       cell: ({ row }) => {
         return (
           <TextSM className="text-[#0A0A0A] flex items-center gap-2 ">
@@ -65,7 +97,18 @@ export default function ProductIssuesTable({ store }: { store: store }) {
     },
     {
       accessorKey: "stores",
-      header: () => <div className="text-end">Available in #Stores</div>,
+      header: ({ column }) => (
+        <div className="text-end">
+          <Button
+            variant="ghost"
+            className="text-xs font-normal ml-auto"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Available in #Stores
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      ),
       cell: ({ row }) => {
         return (
           <TextSM className="text-[#0A0A0A] font-normal text-end inline-block w-full p-4">
@@ -124,11 +167,31 @@ export default function ProductIssuesTable({ store }: { store: store }) {
     },
   ];
 
+  const filteredCount =
+    tableData?.filter((row) => {
+      // do your manual filtering (like search in product) here
+      return search
+        ? row.product?.toLowerCase().includes(search.toLowerCase())
+        : true;
+    }).length ?? 0;
+
   const table = useReactTable({
     data: tableData,
     columns: columnsTable,
+    state: { pagination, sorting, columnFilters },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    pageCount: Math.ceil(filteredCount / pagination.pageSize) || 0,
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
   });
+
+  useEffect(() => {
+    table.getColumn("product")?.setFilterValue(search);
+  }, [search]);
 
   return (
     <div>
@@ -202,6 +265,7 @@ export default function ProductIssuesTable({ store }: { store: store }) {
             )}
           </TableBody>
         </Table>
+        <Pagination table={table} />
       </div>
       {/* bottom CTA - matching desired screenshot (optional) */}
       <div className="w-full flex justify-center mt-2">
