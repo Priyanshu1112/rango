@@ -26,7 +26,8 @@ The app will be available at [http://localhost:3000](http://localhost:3000)
 
 - **Complete Page:** The entire Product Insights page has been created as per the assignment requirements.  
 - **Mock API Integration:** The app serves randomized mock data through API endpoints to simulate real backend responses.  
-- **Interactive Charts:** Charts are built with Chart.js and are interactive (hover, tooltips, legends, custom plugins, etc.).  
+- **Interactive Charts:** Charts are built with Chart.js and are interactive (hover, tooltips, legends, custom plugins, etc.).
+- **Tables:** Tables are paginated, sortable and searchable. 
 
 ## 🎥 Demo & Preview
 - **Live Demo:** [https://rango-beta.vercel.app](https://rango-beta.vercel.app)
